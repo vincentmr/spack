@@ -31,7 +31,7 @@ class PyPennylaneLightning(CMakePackage, PythonExtension):
         description="Build with AVX2/AVX512 gate automatic dispatching support",
     )
     variant("kokkos", default=True, description="Build with Kokkos support")
-    variant("openmp", default=True, description="Build with OpenMP support")
+    variant("openmp", default=False, description="Build with OpenMP support")
 
     variant("native", default=False, description="Build natively for given hardware")
     variant("verbose", default=False, description="Build with full verbosity")
@@ -54,7 +54,7 @@ class PyPennylaneLightning(CMakePackage, PythonExtension):
 
     # variant defined dependencies
     depends_on("blas", when="+blas")
-    depends_on("kokkos@3.7.00", when="+kokkos")
+    depends_on("kokkos@3.7.00+cxx_ext", when="+kokkos")
     depends_on("kokkos-kernels@3.7.00", when="+kokkos")
     depends_on("llvm-openmp", when="+openmp %apple-clang")
 
@@ -90,8 +90,11 @@ class CMakeBuilder(spack.build_systems.cmake.CMakeBuilder):
                 f"-DKokkos_Core_DIR={self.spec['kokkos'].home}",
                 f"-DKokkos_Kernels_DIR={self.spec['kokkos-kernels'].home}",
             ]
+            if "hip" in self.spec.flat_dependencies():
+                args.append(self.define("CMAKE_CXX_COMPILER", self.spec["hip"].hipcc))
         else:
             args += ["-DENABLE_KOKKOS=OFF"]
+
 
         return args
 

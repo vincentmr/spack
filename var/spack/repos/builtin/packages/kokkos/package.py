@@ -225,6 +225,7 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
     patch("hpx_profiling_fences.patch", when="@3.5.00 +hpx")
 
     variant("shared", default=True, description="Build shared libraries")
+    variant("cxx_ext", default=False, description="Build with CXX extensions")
 
     # Filter spack-generated files that may include links to the
     # spack compiler wrappers
@@ -278,6 +279,7 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
             from_variant("CMAKE_POSITION_INDEPENDENT_CODE", "pic"),
             from_variant("CMAKE_CXX_STANDARD", "std"),
             from_variant("BUILD_SHARED_LIBS", "shared"),
+            from_variant("CMAKE_CXX_EXTENSIONS", "cxx_ext"),
         ]
 
         spack_microarches = []
@@ -322,7 +324,6 @@ class Kokkos(CMakePackage, CudaPackage, ROCmPackage):
             options.append(
                 self.define("CMAKE_CXX_COMPILER", self.spec["kokkos-nvcc-wrapper"].kokkos_cxx)
             )
-
         return options
 
     test_script_relative_path = join_path("scripts", "spack_test")
